@@ -19,8 +19,14 @@ df['date'] = pd.to_datetime(df['date'])
 df.sort_values('date', inplace=True)
 
 st.sidebar.header("📅 Date Range")
-date_min = st.sidebar.date_input("From", df['date'].min().date())
-date_max = st.sidebar.date_input("To", df['date'].max().date())
+if df['date'].isnull().all():
+    st.error("❌ No valid dates found in 'aqi_log.csv'. Please check your file.")
+    st.stop()
+
+valid_dates = df['date'].dropna()
+date_min = st.sidebar.date_input("From", valid_dates.min().date())
+date_max = st.sidebar.date_input("To", valid_dates.max().date())
+
 filtered = df[(df['date'] >= pd.to_datetime(date_min)) & (df['date'] <= pd.to_datetime(date_max))]
 
 avg_aqi = filtered['predicted_aqi_tomorrow'].mean()
